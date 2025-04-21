@@ -1,6 +1,6 @@
 {
-  "name": "react-slick",
-  "version": "0.30.3",
+  "name": "@freshcells/react-slick",
+  "version": "0.30.5",
   "description": " React port of slick carousel",
   "main": "./lib",
   "files": [
@@ -39,6 +39,7 @@
     "react-component"
   ],
   "devDependencies": {
+    "jquery": "^3.7.1",
     "@babel/cli": "^7.0.0",
     "@babel/core": "^7.16.0",
     "@babel/eslint-parser": "^7.16.3",
@@ -49,6 +50,7 @@
     "@playwright/experimental-ct-react": "^1.49.1",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^16.1.0",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/user-event": "^14.3.0",
     "@types/node": "^22.10.2",
     "autoprefixer": "^7.1.2",
@@ -105,7 +107,7 @@
       "git add"
     ]
   },
-  "npmName": "react-slick",
+  "npmName": "@freshcells/react-slick",
   "npmFileMap": [
     {
       "basePath": "/dist/",
@@ -122,5 +124,6 @@
     "type": "opencollective",
     "url": "https://opencollective.com/react-slick",
     "logo": "https://opencollective.com/opencollective/logo.txt"
-  }
+  },
+  "packageManager": "yarn@3.6.3+sha512.d432ab8b22b89cb8b46649ebaf196159b0c1870904224771d75fdf8b55490aaa5de4d9f028deb0425f1513bff7843e97b9d117103795a23b12d2e7c1cedcf50f"
 }

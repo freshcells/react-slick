@@ -26,6 +26,7 @@ import { Track } from "./track";
 import { Dots } from "./dots";
 import { PrevArrow, NextArrow } from "./arrows";
 import ResizeObserver from "resize-observer-polyfill";
+import classNames from "classnames";
 
 export class InnerSlider extends React.Component {
   constructor(props) {
@@ -34,6 +35,7 @@ export class InnerSlider extends React.Component {
     this.track = null;
     this.state = {
       ...initialState,
+      transitioning: false,
       currentSlide: this.props.initialSlide,
       targetSlide: this.props.initialSlide ? this.props.initialSlide : 0,
       slideCount: React.Children.count(this.props.children)
@@ -44,6 +46,7 @@ export class InnerSlider extends React.Component {
     const ssrState = this.ssrInit();
     this.state = { ...this.state, ...ssrState };
   }
+
   listRefHandler = ref => (this.list = ref);
   trackRefHandler = ref => (this.track = ref);
   adaptHeight = () => {
@@ -54,20 +57,29 @@ export class InnerSlider extends React.Component {
       this.list.style.height = getHeight(elem) + "px";
     }
   };
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.lazyLoad) {
+      let slidesToLoad = getOnDemandLazySlides({
+        ...nextProps,
+        ...prevState
+      });
+      if (slidesToLoad.length > 0) {
+        const lazyLoadedList = prevState.lazyLoadedList.concat(slidesToLoad);
+        return {
+          ...prevState,
+          lazyLoadedList
+        };
+      }
+    }
+    return null;
+  }
+
   componentDidMount = () => {
     this.props.onInit && this.props.onInit();
     if (this.props.lazyLoad) {
-      let slidesToLoad = getOnDemandLazySlides({
-        ...this.props,
-        ...this.state
-      });
-      if (slidesToLoad.length > 0) {
-        this.setState(prevState => ({
-          lazyLoadedList: prevState.lazyLoadedList.concat(slidesToLoad)
-        }));
-        if (this.props.onLazyLoad) {
-          this.props.onLazyLoad(slidesToLoad);
-        }
+      if (this.props.onLazyLoad) {
+        this.props.onLazyLoad(this.state.lazyLoadedList);
       }
     }
     let spec = { listRef: this.list, trackRef: this.track, ...this.props };
@@ -498,7 +510,16 @@ export class InnerSlider extends React.Component {
     if (!state) return;
     let triggerSlideHandler = state["triggerSlideHandler"];
     delete state["triggerSlideHandler"];
-    this.setState(state);
+    if (state.trackStyle) {
+      this.track.node.addEventListener(
+        "transitionend",
+        () => {
+          this.setState({ animating: false });
+        },
+        { once: true }
+      );
+    }
+    this.setState({ ...state, animating: Boolean(state.trackStyle) });
     if (triggerSlideHandler === undefined) return;
     this.slideHandler(triggerSlideHandler);
     if (this.props.verticalSwiping) {
@@ -728,7 +749,9 @@ export class InnerSlider extends React.Component {
     const listStyle = { ...verticalHeightStyle, ...centerPaddingStyle };
     const touchMove = this.props.touchMove;
     let listProps = {
-      className: "slick-list",
+      className: classNames("slick-list", {
+        ["slick-slider-animating"]: this.state.dragging || this.state.animating
+      }),
       style: listStyle,
       onClick: this.clickHandler,
       onMouseDown: touchMove ? this.swipeStart : null,

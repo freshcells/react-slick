@@ -12,6 +12,28 @@ export const safePreventDefault = event => {
   }
 };
 
+export const createIntersectionObserver = (root) => {
+  return new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          entry.target.setAttribute("tabindex", "-1");
+        } else {
+          entry.target.removeAttribute("tabindex");
+        }
+        entry.target.setAttribute(
+          "aria-hidden",
+          entry.isIntersecting ? "false" : "true"
+        );
+      });
+    },
+    {
+      root,
+      threshold: 0.1
+    }
+  );
+};
+
 export const getOnDemandLazySlides = spec => {
   let onDemandSlides = [];
   let startIndex = lazyStartIndex(spec);

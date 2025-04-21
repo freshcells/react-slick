@@ -5,7 +5,8 @@ import classnames from "classnames";
 import {
   lazyStartIndex,
   lazyEndIndex,
-  getPreClones
+  getPreClones,
+  createIntersectionObserver
 } from "./utils/innerSliderUtils";
 
 // given specifications/props for a slide, fetch all the classes that need to be applied to the slide
@@ -95,6 +96,7 @@ const renderSlides = spec => {
   let childrenCount = React.Children.count(spec.children);
   let startIndex = lazyStartIndex(spec);
   let endIndex = lazyEndIndex(spec);
+  const childRefs = spec.childRefs;
 
   React.Children.forEach(spec.children, (elem, index) => {
     let child;
@@ -122,10 +124,17 @@ const renderSlides = spec => {
       React.cloneElement(child, {
         key: "original" + getKey(child, index),
         "data-index": index,
+        ref: el => {
+          if (el) {
+            childRefs.add(el);
+          }
+        },
         className: classnames(slideClasses, slideClass),
-        tabIndex: "-1",
-        "aria-hidden": !slideClasses["slick-active"],
-        style: { outline: "none", ...(child.props.style || {}), ...childStyle },
+        style: {
+          outline: "none",
+          ...(child.props.style || {}),
+          ...childStyle
+        },
         onClick: e => {
           child.props && child.props.onClick && child.props.onClick(e);
           if (spec.focusOnSelect) {
@@ -153,9 +162,12 @@ const renderSlides = spec => {
           React.cloneElement(child, {
             key: "precloned" + getKey(child, key),
             "data-index": key,
-            tabIndex: "-1",
+            ref: el => {
+              if (el) {
+                childRefs.add(el);
+              }
+            },
             className: classnames(slideClasses, slideClass),
-            "aria-hidden": !slideClasses["slick-active"],
             style: { ...(child.props.style || {}), ...childStyle },
             onClick: e => {
               child.props && child.props.onClick && child.props.onClick(e);
@@ -176,9 +188,12 @@ const renderSlides = spec => {
         React.cloneElement(child, {
           key: "postcloned" + getKey(child, key),
           "data-index": key,
-          tabIndex: "-1",
+          ref: el => {
+            if (el) {
+              childRefs.add(el);
+            }
+          },
           className: classnames(slideClasses, slideClass),
-          "aria-hidden": !slideClasses["slick-active"],
           style: { ...(child.props.style || {}), ...childStyle },
           onClick: e => {
             child.props && child.props.onClick && child.props.onClick(e);
@@ -201,12 +216,43 @@ const renderSlides = spec => {
 export class Track extends React.PureComponent {
   node = null;
 
+  constructor(props) {
+    super(props);
+    this.childRefs = new Set();
+    this.observer = null;
+  }
+
   handleRef = ref => {
     this.node = ref;
   };
 
+  componentDidMount() {
+    this.setupIntersectionObserver();
+  }
+
+  componentWillUnmount() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+  }
+
+  setupIntersectionObserver() {
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+    this.observer = createIntersectionObserver(this.node.parentNode);
+    this.childRefs.forEach(element => {
+      if (element && element instanceof Element) {
+        this.observer.observe(element);
+      }
+    });
+  }
+
   render() {
-    const slides = renderSlides(this.props);
+    const slides = renderSlides({
+      childRefs: this.childRefs,
+      ...this.props
+    });
     const { onMouseEnter, onMouseOver, onMouseLeave } = this.props;
     const mouseEvents = { onMouseEnter, onMouseOver, onMouseLeave };
     return (
