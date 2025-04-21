@@ -230,6 +230,10 @@ export class Track extends React.PureComponent {
     this.setupIntersectionObserver();
   }
 
+  componentDidUpdate() {
+    this.setupIntersectionObserver();
+  }
+
   componentWillUnmount() {
     if (this.observer) {
       this.observer.disconnect();
