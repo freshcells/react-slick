@@ -118,6 +118,6 @@
     display: none;
 }
 
-.slick-list:not(.slick-slider-animating) [aria-hidden=true] {
+.slick-list:not(.slick-slider-animating) .slick-slide[aria-hidden=true] {
     visibility: hidden;
 }
