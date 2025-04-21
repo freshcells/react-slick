@@ -20,12 +20,15 @@ export default class Slider extends React.Component {
   media(query, handler) {
     // javascript handler for  css media query
     const mql = window.matchMedia(query);
+    if (mql.matches) {
+      handler();
+    }
     const listener = ({ matches }) => {
       if (matches) {
         handler();
       }
     };
-    mql.addListener(listener);
+    mql.addEventListener("change", listener);
     this._responsiveMediaHandlers.push({ mql, query, listener });
   }
 
@@ -74,7 +77,7 @@ export default class Slider extends React.Component {
 
   componentWillUnmount() {
     this._responsiveMediaHandlers.forEach(function(obj) {
-      obj.mql.removeListener(obj.listener);
+      obj.mql.removeEventListener("change", obj.listener);
     });
   }
 

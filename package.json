@@ -1,6 +1,6 @@
 {
   "name": "@freshcells/react-slick",
-  "version": "0.30.6",
+  "version": "0.30.7",
   "description": " React port of slick carousel",
   "main": "./lib",
   "files": [
