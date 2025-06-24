@@ -6,6 +6,7 @@ import {
   lazyStartIndex,
   lazyEndIndex,
   getPreClones,
+  getPostClones,
   createIntersectionObserver
 } from "./utils/innerSliderUtils";
 
@@ -178,31 +179,32 @@ const renderSlides = spec => {
           })
         );
       }
-
-      key = childrenCount + index;
-      if (key < endIndex) {
-        child = elem;
+      if (index < getPostClones(spec)) {
+        key = childrenCount + index;
+        if (key < endIndex) {
+          child = elem;
+        }
+        slideClasses = getSlideClasses({ ...spec, index: key });
+        postCloneSlides.push(
+          React.cloneElement(child, {
+            key: "postcloned" + getKey(child, key),
+            "data-index": key,
+            ref: el => {
+              if (el) {
+                childRefs.add(el);
+              }
+            },
+            className: classnames(slideClasses, slideClass),
+            style: { ...(child.props.style || {}), ...childStyle },
+            onClick: e => {
+              child.props && child.props.onClick && child.props.onClick(e);
+              if (spec.focusOnSelect) {
+                spec.focusOnSelect(childOnClickOptions);
+              }
+            }
+          })
+        );
       }
-      slideClasses = getSlideClasses({ ...spec, index: key });
-      postCloneSlides.push(
-        React.cloneElement(child, {
-          key: "postcloned" + getKey(child, key),
-          "data-index": key,
-          ref: el => {
-            if (el) {
-              childRefs.add(el);
-            }
-          },
-          className: classnames(slideClasses, slideClass),
-          style: { ...(child.props.style || {}), ...childStyle },
-          onClick: e => {
-            child.props && child.props.onClick && child.props.onClick(e);
-            if (spec.focusOnSelect) {
-              spec.focusOnSelect(childOnClickOptions);
-            }
-          }
-        })
-      );
     }
   });
 
