@@ -164,7 +164,6 @@ export class InnerSlider extends React.Component {
   }
 
   componentDidUpdate = prevProps => {
-    this.checkImagesLoad();
     this.props.onReInit && this.props.onReInit();
     if (this.props.lazyLoad) {
       let slidesToLoad = getOnDemandLazySlides({
@@ -315,44 +314,6 @@ export class InnerSlider extends React.Component {
       slideWidth: slideWidth + "%",
       trackStyle: trackStyle
     };
-  };
-  checkImagesLoad = () => {
-    let images =
-      (this.list &&
-        this.list.querySelectorAll &&
-        this.list.querySelectorAll(".slick-slide img")) ||
-      [];
-    let imagesCount = images.length,
-      loadedCount = 0;
-    Array.prototype.forEach.call(images, image => {
-      const handler = () =>
-        ++loadedCount && loadedCount >= imagesCount && this.onWindowResized();
-      if (!image.onclick) {
-        image.onclick = () => image.parentNode.focus();
-      } else {
-        const prevClickHandler = image.onclick;
-        image.onclick = e => {
-          prevClickHandler(e);
-          image.parentNode.focus();
-        };
-      }
-      if (!image.onload) {
-        if (this.props.lazyLoad) {
-          image.onload = () => {
-            this.adaptHeight();
-            this.callbackTimers.push(
-              setTimeout(this.onWindowResized, this.props.speed)
-            );
-          };
-        } else {
-          image.onload = handler;
-          image.onerror = () => {
-            handler();
-            this.props.onLazyLoadError && this.props.onLazyLoadError();
-          };
-        }
-      }
-    });
   };
   progressiveLazyLoad = () => {
     let slidesToLoad = [];
