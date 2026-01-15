@@ -46,6 +46,7 @@ let defaultProps = {
   swipeToSlide: false,
   touchMove: true,
   touchThreshold: 5,
+  trackTag: "div",
   useCSS: true,
   useTransform: true,
   variableWidth: false,
