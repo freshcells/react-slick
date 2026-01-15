@@ -158,6 +158,7 @@ export default class Slider extends React.Component {
       settings.variableWidth = false;
     }
     let newChildren = [];
+    const SlideTag = settings.slide;
     let currentWidth = null;
     for (
       let i = 0;
@@ -191,12 +192,12 @@ export default class Slider extends React.Component {
       }
       if (settings.variableWidth) {
         newChildren.push(
-          <div key={i} style={{ width: currentWidth }}>
+          <SlideTag key={i} style={{ width: currentWidth }}>
             {newSlide}
-          </div>
+          </SlideTag>
         );
       } else {
-        newChildren.push(<div key={i}>{newSlide}</div>);
+        newChildren.push(<SlideTag key={i}>{newSlide}</SlideTag>);
       }
     }
 
